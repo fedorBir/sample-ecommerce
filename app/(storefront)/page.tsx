@@ -12,7 +12,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1>Featured products</h1>
+      <h1>Featured products - testRigor</h1>
       <nav style={{ margin: "0.5rem 0 1.5rem" }}>
         <strong>Categories:</strong>{" "}
         {categories.map((c) => (
