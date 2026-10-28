@@ -32,5 +32,17 @@ services:
       timeout: 3s
       retries: 20
 
+  # The pokemon-backend checkout (codeCake clones every repository of the suite next to this one, each at
+  # its pull request when the task has one), so a validation deploys the backend change too.
+  pokemon_backend:
+    build:
+      context: ../../pokemon-backend
+      dockerfile: codeCake/Dockerfile
+    ports:
+      - "3301:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+
 volumes:
   node_modules:
