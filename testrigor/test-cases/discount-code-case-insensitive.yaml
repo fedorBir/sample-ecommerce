@@ -1,0 +1,24 @@
+customSteps: |
+  // ── Test: Codes are case-insensitive (save10 works like SAVE10) ────────────
+  // Acceptance Criteria: AC3
+  // - Lowercase "save10" should work the same as uppercase "SAVE10"
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Apply lowercase "save10" code
+  enter "save10" into "discount code"
+  click "Apply"
+
+  // Verify lowercase code works and 10% discount is applied
+  grab value from "Discount" and save it as "discountLine"
+  check that stored value "discountLine" contains "10% off"
+  check that stored value "discountLine" contains "SAVE10"
+  check that page contains "-$"
+
+labels: [discount, cart, checkout, case-insensitive]
