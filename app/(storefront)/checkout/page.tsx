@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { getCartItems } from "@/lib/cart";
+import { getCartItems, getCartIdFromCookie } from "@/lib/cart";
 import { getSessionUser } from "@/lib/auth";
 import { priceOrder } from "@/lib/pricing";
 import { formatUsd } from "@/lib/money";
 import { placeOrderAction } from "@/app/actions/checkout";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,11 @@ export default async function CheckoutPage({
 
   const user = await getSessionUser();
   const subtotal = items.reduce((s, i) => s + i.product.priceCents * i.quantity, 0);
-  const totals = priceOrder(subtotal);
+
+  const cartId = getCartIdFromCookie();
+  const cart = cartId ? await prisma.cart.findUnique({ where: { id: cartId } }) : null;
+
+  const totals = priceOrder(subtotal, cart?.discountCode || undefined);
 
   const errorMsg =
     searchParams.error === "missing"
@@ -124,6 +129,12 @@ export default async function CheckoutPage({
             ))}
           </ul>
           <p>Subtotal: {formatUsd(totals.subtotalCents)}</p>
+          {totals.discountCents > 0 && (
+            <p style={{ color: "green" }}>
+              Discount ({cart?.discountCode}, {totals.subtotalCents > 0 ? Math.round((totals.discountCents / totals.subtotalCents) * 100) : 0}% off): -
+              {formatUsd(totals.discountCents)}
+            </p>
+          )}
           <p>Delivery: {formatUsd(totals.shippingCents)}</p>
           <p>Tax: {formatUsd(totals.taxCents)}</p>
           <p>
