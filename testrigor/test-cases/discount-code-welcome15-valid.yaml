@@ -1,0 +1,31 @@
+customSteps: |
+  // ── Test: Apply valid WELCOME15 discount code ─────────────────────────────
+  // Acceptance Criteria: AC2
+  // - WELCOME15 takes 15% off the subtotal
+  // - Discount line shows correct format and percentage
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  check that page contains stored value from "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Apply WELCOME15 code
+  enter stored value "discountCodeWelcome15" into "discount code"
+  click "Apply"
+
+  // Verify 15% discount is applied (AC2)
+  grab value from "Discount" and save it as "discountLine"
+  check that stored value "discountLine" contains "15% off"
+  check that stored value "discountLine" contains "WELCOME15"
+
+  // Verify discount amount is shown as negative
+  check that page contains "-$"
+
+  // Verify totals are updated
+  check that page contains "Total"
+
+labels: [discount, cart, checkout]

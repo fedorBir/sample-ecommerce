@@ -35,6 +35,12 @@ export default async function ConfirmationPage({
         ))}
       </ul>
       <p>Subtotal: {formatUsd(order.subtotalCents)}</p>
+      {order.discountCents > 0 && (
+        <p style={{ color: "green" }}>
+          Discount ({order.subtotalCents > 0 ? Math.round((order.discountCents / order.subtotalCents) * 100) : 0}% off): -
+          {formatUsd(order.discountCents)}
+        </p>
+      )}
       <p>Shipping: {formatUsd(order.shippingCents)}</p>
       <p>Tax: {formatUsd(order.taxCents)}</p>
       <p>

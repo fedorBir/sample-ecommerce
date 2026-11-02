@@ -1,0 +1,38 @@
+customSteps: |
+  // ── Test: Discount appears in order confirmation (AC6) ────────────────────
+  // Acceptance Criteria: AC6
+  // - The placed order's total includes the discount
+  // - Discount line appears on order confirmation page
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Apply WELCOME15 discount
+  enter stored value "discountCodeWelcome15" into "discount code"
+  click "Apply"
+
+  click "Proceed to Checkout"
+
+  // Fill out checkout form
+  generate unique email, then enter into "Email address" and save as "checkoutEmail"
+  fill-checkout-shipping-and-payment
+  click "Place Order"
+
+  // Verify order confirmation page (AC6)
+  check that page contains "Thank you for your purchase!"
+
+  // Verify discount line on confirmation page (AC6)
+  check that page contains "Discount"
+  check that page contains "15% off"
+  check that page contains "WELCOME15"
+  check that page contains "-$"
+
+  // Verify totals are shown
+  check that page contains "Total"
+
+labels: [discount, checkout, confirmation, order]

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getCartItems, clearCart } from "@/lib/cart";
+import { getCartItems, clearCart, getCartIdFromCookie } from "@/lib/cart";
 import { getSessionUser } from "@/lib/auth";
 import { priceOrder } from "@/lib/pricing";
 import { charge } from "@/lib/payment";
@@ -76,7 +76,12 @@ export async function placeOrderAction(formData: FormData) {
     }
   }
   const subtotalCents = items.reduce((s, it) => s + it.product.priceCents * it.quantity, 0);
-  const totals = priceOrder(subtotalCents);
+
+  // Get cart including discount code
+  const cartId = getCartIdFromCookie();
+  const cart = cartId ? await prisma.cart.findUnique({ where: { id: cartId } }) : null;
+
+  const totals = priceOrder(subtotalCents, cart?.discountCode || undefined);
 
   const orderNumber = await nextOrderNumber();
 
@@ -102,6 +107,7 @@ export async function placeOrderAction(formData: FormData) {
         paymentStatus: "PAID",
         paymentRef: payment.ref,
         subtotalCents: totals.subtotalCents,
+        discountCents: totals.discountCents,
         shippingCents: totals.shippingCents,
         taxCents: totals.taxCents,
         totalCents: totals.totalCents,
@@ -139,17 +145,32 @@ export async function placeOrderAction(formData: FormData) {
   const itemLines = items
     .map((it) => `${it.quantity} x ${it.product.name} — ${formatUsd(it.product.priceCents)}`)
     .join("\n");
+
+  let emailBody = `Thank you for your purchase!\n\nOrder ${orderNumber}\n${itemLines}\n\nSubtotal: ${formatUsd(totals.subtotalCents)}`;
+  if (totals.discountCents > 0 && cart?.discountCode) {
+    const discountPercent = Math.round((totals.discountCents / totals.subtotalCents) * 100);
+    emailBody += `\nDiscount (${cart.discountCode}, ${discountPercent}% off): -${formatUsd(totals.discountCents)}`;
+  }
+  emailBody += `\nShipping: ${formatUsd(totals.shippingCents)}\nTax: ${formatUsd(totals.taxCents)}\n\nTotal: ${formatUsd(
+    totals.totalCents
+  )}\nShipping to: ${shipping.fullName}, ${shipping.line1}, ${shipping.city}, ${shipping.state} ${shipping.postalCode}`;
+
   await sendMail({
     to: email,
     subject: `Order ${orderNumber} confirmed`,
-    text: `Thank you for your purchase!\n\nOrder ${orderNumber}\n${itemLines}\n\nTotal: ${formatUsd(
-      totals.totalCents
-    )}\nShipping to: ${shipping.fullName}, ${shipping.line1}, ${shipping.city}, ${shipping.state} ${shipping.postalCode}`,
+    text: emailBody,
   });
+
+  let ownerBody = `New order ${orderNumber} from ${email}. Total ${formatUsd(totals.totalCents)}.\n${itemLines}`;
+  if (totals.discountCents > 0 && cart?.discountCode) {
+    const discountPercent = Math.round((totals.discountCents / totals.subtotalCents) * 100);
+    ownerBody += `\nDiscount (${cart.discountCode}, ${discountPercent}% off): -${formatUsd(totals.discountCents)}`;
+  }
+
   await sendMail({
     to: process.env.OWNER_EMAIL || "owner@example.com",
     subject: `New order ${orderNumber}`,
-    text: `New order ${orderNumber} from ${email}. Total ${formatUsd(totals.totalCents)}.\n${itemLines}`,
+    text: ownerBody,
   });
 
   revalidatePath("/", "layout");

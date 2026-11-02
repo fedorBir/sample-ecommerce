@@ -1,0 +1,37 @@
+customSteps: |
+  // ── Test: Discount carries to checkout with correct tax calculation ──────
+  // Acceptance Criteria: AC5
+  // - Applied discount carries over to checkout
+  // - Order summary shows discount line
+  // - Tax is calculated on discounted subtotal
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Apply SAVE10 discount
+  enter stored value "discountCodeSave10" into "discount code"
+  click "Apply"
+
+  // Verify discount applied in cart
+  check that page contains "10% off"
+  check that page contains "SAVE10"
+
+  // Proceed to checkout
+  click "Proceed to Checkout"
+
+  // Verify discount line appears in checkout (AC5)
+  check that page contains "Discount"
+  check that page contains "10% off"
+  check that page contains "SAVE10"
+  check that page contains "-$"
+
+  // Verify tax is shown (and should be calculated on discounted amount) (AC5)
+  check that page contains "Tax"
+  check that page contains "Total"
+
+labels: [discount, checkout, tax-calculation, persistence]

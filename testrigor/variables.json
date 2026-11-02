@@ -26,5 +26,12 @@
   "trackingNumber": "1Z999AA10123456784",
 
   "newCustomerName": "Sam Shopper",
-  "newCustomerPassword": "Sup3rSecret!23"
+  "newCustomerPassword": "Sup3rSecret!23",
+
+  "discountCodeSave10": "SAVE10",
+  "discountCodeWelcome15": "WELCOME15",
+  "discountCodeInvalid": "INVALID123",
+  "testValue": "val 3",
+  "featuredProductsTitle": "Featured products - testRigor",
+  "testNumber": "testRigor 42"
 }

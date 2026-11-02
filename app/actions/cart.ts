@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getOrCreateCartId, getCartIdFromCookie } from "@/lib/cart";
+import { validateDiscountCode } from "@/lib/pricing";
 
 export async function addToCartAction(formData: FormData) {
   const productId = String(formData.get("productId") || "");
@@ -57,5 +58,40 @@ export async function removeCartItemAction(formData: FormData) {
   }
   revalidatePath("/cart");
   revalidatePath("/", "layout");
+  redirect("/cart");
+}
+
+export async function applyDiscountCodeAction(formData: FormData) {
+  const discountCode = String(formData.get("discountCode") || "").trim();
+  const cartId = await getOrCreateCartId();
+
+  if (!discountCode) {
+    redirect("/cart");
+  }
+
+  const validation = validateDiscountCode(discountCode);
+  if (!validation.valid) {
+    // Redirect with error parameter (handled in cart page)
+    redirect("/cart?error=Invalid discount code");
+  }
+
+  await prisma.cart.update({
+    where: { id: cartId },
+    data: { discountCode: discountCode.toUpperCase() },
+  });
+
+  revalidatePath("/cart");
+  redirect("/cart");
+}
+
+export async function removeDiscountCodeAction(formData: FormData) {
+  const cartId = await getOrCreateCartId();
+
+  await prisma.cart.update({
+    where: { id: cartId },
+    data: { discountCode: null },
+  });
+
+  revalidatePath("/cart");
   redirect("/cart");
 }

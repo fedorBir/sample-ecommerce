@@ -10,9 +10,12 @@ export default async function HomePage() {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
 
+  const featuredProductsTitle = process.env.FEATURED_PRODUCTS_TITLE || "Featured products - testRigor";
+  const testNumber = process.env.TEST_NUMBER || "testRigor 42";
+
   return (
     <>
-      <h1>Featured products</h1>
+      <h1>{featuredProductsTitle}</h1>
       <nav style={{ margin: "0.5rem 0 1.5rem" }}>
         <strong>Categories:</strong>{" "}
         {categories.map((c) => (
@@ -21,6 +24,7 @@ export default async function HomePage() {
           </Link>
         ))}
       </nav>
+      <p>{testNumber}</p>
       <div className="grid">
         {products.map((p) => (
           <div className="card" key={p.id}>
