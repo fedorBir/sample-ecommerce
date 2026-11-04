@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { formatUsd } from "@/lib/money";
+import { discountLine } from "@/lib/discounts";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,11 @@ export default async function ConfirmationPage({
         ))}
       </ul>
       <p>Subtotal: {formatUsd(order.subtotalCents)}</p>
+      {order.discountCode !== null && order.discountPercent !== null && (
+        <p>
+          {discountLine({ code: order.discountCode, percent: order.discountPercent }, order.discountCents)}
+        </p>
+      )}
       <p>Shipping: {formatUsd(order.shippingCents)}</p>
       <p>Tax: {formatUsd(order.taxCents)}</p>
       <p>

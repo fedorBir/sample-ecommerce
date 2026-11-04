@@ -10,6 +10,7 @@ import { charge } from "@/lib/payment";
 import { nextOrderNumber } from "@/lib/order-number";
 import { sendMail } from "@/lib/mail";
 import { formatUsd } from "@/lib/money";
+import { getAppliedDiscount, discountCents, discountLine, clearAppliedDiscount } from "@/lib/discounts";
 
 export async function placeOrderAction(formData: FormData) {
   const get = (k: string) => String(formData.get(k) || "").trim();
@@ -76,7 +77,9 @@ export async function placeOrderAction(formData: FormData) {
     }
   }
   const subtotalCents = items.reduce((s, it) => s + it.product.priceCents * it.quantity, 0);
-  const totals = priceOrder(subtotalCents);
+  const discount = getAppliedDiscount();
+  const discountAmount = discount ? discountCents(subtotalCents, discount.percent) : 0;
+  const totals = priceOrder(subtotalCents, discountAmount);
 
   const orderNumber = await nextOrderNumber();
 
@@ -105,6 +108,9 @@ export async function placeOrderAction(formData: FormData) {
         shippingCents: totals.shippingCents,
         taxCents: totals.taxCents,
         totalCents: totals.totalCents,
+        discountCode: discount?.code ?? null,
+        discountPercent: discount?.percent ?? null,
+        discountCents: discountAmount,
         shipping: JSON.stringify(shipping),
         billing: JSON.stringify(billing),
         items: {
@@ -134,15 +140,17 @@ export async function placeOrderAction(formData: FormData) {
   });
 
   await clearCart();
+  clearAppliedDiscount();
 
   // Best-effort emails.
   const itemLines = items
     .map((it) => `${it.quantity} x ${it.product.name} — ${formatUsd(it.product.priceCents)}`)
     .join("\n");
+  const discountNote = discount ? `${discountLine(discount, discountAmount)}\n` : "";
   await sendMail({
     to: email,
     subject: `Order ${orderNumber} confirmed`,
-    text: `Thank you for your purchase!\n\nOrder ${orderNumber}\n${itemLines}\n\nTotal: ${formatUsd(
+    text: `Thank you for your purchase!\n\nOrder ${orderNumber}\n${itemLines}\n\n${discountNote}Total: ${formatUsd(
       totals.totalCents
     )}\nShipping to: ${shipping.fullName}, ${shipping.line1}, ${shipping.city}, ${shipping.state} ${shipping.postalCode}`,
   });

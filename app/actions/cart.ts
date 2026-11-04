@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getOrCreateCartId, getCartIdFromCookie } from "@/lib/cart";
+import { findDiscount, setAppliedDiscount, clearAppliedDiscount } from "@/lib/discounts";
 
 export async function addToCartAction(formData: FormData) {
   const productId = String(formData.get("productId") || "");
@@ -57,5 +58,22 @@ export async function removeCartItemAction(formData: FormData) {
   }
   revalidatePath("/cart");
   revalidatePath("/", "layout");
+  redirect("/cart");
+}
+
+export async function applyDiscountAction(formData: FormData) {
+  const discount = findDiscount(String(formData.get("discountCode") ?? ""));
+  if (!discount) {
+    clearAppliedDiscount();
+    redirect("/cart?discount=invalid");
+  }
+  setAppliedDiscount(discount.code);
+  revalidatePath("/cart");
+  redirect("/cart");
+}
+
+export async function removeDiscountAction() {
+  clearAppliedDiscount();
+  revalidatePath("/cart");
   redirect("/cart");
 }

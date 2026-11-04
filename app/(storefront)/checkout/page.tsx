@@ -3,6 +3,7 @@ import { getCartItems } from "@/lib/cart";
 import { getSessionUser } from "@/lib/auth";
 import { priceOrder } from "@/lib/pricing";
 import { formatUsd } from "@/lib/money";
+import { getAppliedDiscount, discountCents, discountLine } from "@/lib/discounts";
 import { placeOrderAction } from "@/app/actions/checkout";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,9 @@ export default async function CheckoutPage({
 
   const user = await getSessionUser();
   const subtotal = items.reduce((s, i) => s + i.product.priceCents * i.quantity, 0);
-  const totals = priceOrder(subtotal);
+  const discount = getAppliedDiscount();
+  const discountAmount = discount ? discountCents(subtotal, discount.percent) : 0;
+  const totals = priceOrder(subtotal, discountAmount);
 
   const errorMsg =
     searchParams.error === "missing"
@@ -124,6 +127,7 @@ export default async function CheckoutPage({
             ))}
           </ul>
           <p>Subtotal: {formatUsd(totals.subtotalCents)}</p>
+          {discount && <p>{discountLine(discount, discountAmount)}</p>}
           <p>Delivery: {formatUsd(totals.shippingCents)}</p>
           <p>Tax: {formatUsd(totals.taxCents)}</p>
           <p>
