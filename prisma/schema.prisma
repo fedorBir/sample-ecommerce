@@ -77,6 +77,9 @@ model Order {
   items          OrderItem[]
   status         String       @default("PENDING") // PENDING PAID PROCESSING SHIPPED DELIVERED CANCELLED REFUNDED
   subtotalCents  Int
+  discountCode   String?
+  discountPercent Int?
+  discountCents  Int          @default(0)
   shippingCents  Int
   taxCents       Int
   totalCents     Int

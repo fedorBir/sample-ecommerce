@@ -28,7 +28,7 @@ A storefront + back office for a single‑store online retailer, modeled loosely
 
 - No real money movement — payment is a **mock/demo** processor (see §7). Architecture must allow swapping in Stripe later without schema changes.
 - No multi‑vendor / marketplace, no multi‑currency (USD only), no multi‑warehouse.
-- No product reviews/ratings, wishlists, discount codes/coupons, or tax‑jurisdiction engine (flat tax rate only).
+- No product reviews/ratings, wishlists, or tax‑jurisdiction engine (flat tax rate only). Discount codes are supported: SAVE10 (10% off) and WELCOME15 (15% off), case-insensitive, applied on the cart and carried to checkout.
 - No mobile apps (responsive web only).
 
 ### 1.3 Key product decisions (locked)
@@ -605,5 +605,5 @@ A feature is done when: it meets its §5/§6 requirements; server‑side validat
 
 ## 15. Open questions / future work
 - Swap mock payment → Stripe (provider interface already in place; add webhook verification).
-- Real tax/shipping engines; discount codes; product reviews; inventory reservations during checkout; address validation; refunds via provider; pagination/infinite scroll for large catalogs; full‑text/search service if catalog grows.
+- Real tax/shipping engines; product reviews; inventory reservations during checkout; address validation; refunds via provider; pagination/infinite scroll for large catalogs; full‑text/search service if catalog grows.
 ```
