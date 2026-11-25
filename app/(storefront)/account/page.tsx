@@ -28,9 +28,12 @@ export default async function AccountPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const testValue = process.env.TEST_VALUE || "val 3";
+
   return (
     <>
       <h1>My Account</h1>
+      <p>{testValue}</p>
       <p>Signed in as {user.email}.</p>
 
       <h2>Order history</h2>

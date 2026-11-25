@@ -1,0 +1,35 @@
+customSteps: |
+  // ── Test: Remove discount code (AC7) ─────────────────────────────────────
+  // Acceptance Criteria: AC7
+  // - Shopper can remove an applied code from the cart
+  // - Totals go back to full price when discount is removed
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Apply discount
+  enter stored value "discountCodeSave10" into "discount code"
+  click "Apply"
+
+  // Verify discount is applied
+  check that page contains "10% off"
+  check that page contains "SAVE10"
+  grab value from "Subtotal" and save it as "subtotalWithDiscount"
+
+  // Remove discount (AC7)
+  click "Remove Discount"
+
+  // Verify discount is removed (AC7)
+  check that page does not contain "10% off"
+  check that page does not contain "SAVE10"
+  check that page does not contain "Remove Discount"
+
+  // Verify totals are back to full price
+  check that page contains "Total"
+
+labels: [discount, cart, remove, AC7]

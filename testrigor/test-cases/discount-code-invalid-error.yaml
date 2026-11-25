@@ -1,0 +1,27 @@
+customSteps: |
+  // ── Test: Invalid code shows error message (AC4) ───────────────────────────
+  // Acceptance Criteria: AC4
+  // - An unknown code shows the error "Invalid discount code"
+  // - No discount is applied when code is invalid
+
+  reset to home
+  enter stored value "checkoutProductName" into "Search"
+  enter enter into "Search"
+  click stored value "checkoutProductName"
+  click "Add to Cart"
+
+  click "Cart"
+
+  // Try to apply invalid code
+  enter stored value "discountCodeInvalid" into "discount code"
+  click "Apply"
+
+  // Verify error message appears (AC4)
+  check that page contains "Invalid discount code"
+
+  // Verify no discount is applied
+  check that page does not contain "Discount"
+  check that page does not contain "10% off"
+  check that page does not contain "15% off"
+
+labels: [discount, cart, error-handling, validation]
